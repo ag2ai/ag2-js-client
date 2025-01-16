@@ -1,0 +1,18 @@
+{
+    "name": "@ag2/realtime-client",
+    "version": "0.0.1",
+    "description": "A JavaScript library for seamless integration and communication with AG2 agents",
+    "keywords": ["ag2", "ai", "agents","typescript"],
+    "homepage": "https://ag2.ai",
+    "bugs": {
+      "url": "https://github.com/ag2ai/ag2-js-realtime-client/issues"
+    },
+    "author": "ag2ai (https://ag2.ai)",
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/ag2ai/ag2-js-realtime-client.git"
+    },
+    "files": ["dist"],
+    "type": "module",
+    "license": "Apache-2.0"
+  }
