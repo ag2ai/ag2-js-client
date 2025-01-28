@@ -10,25 +10,28 @@
   ],
   "homepage": "https://ag2.ai",
   "bugs": {
-    "url": "https://github.com/ag2ai/ag2-js-realtime-client/issues"
+    "url": "https://github.com/ag2ai/ag2-js-client/issues"
   },
   "author": "ag2ai (https://ag2.ai)",
   "scripts": {
     "build": "tsc",
-    "ci": "npm run build && npm run check-format",
+    "ci": "npm run build && npm run check-format && npm run check-exports",
     "format": "prettier --write .",
-    "check-format": "prettier --check ."
+    "check-format": "prettier --check .",
+    "check-exports": "attw --pack . --ignore-rules=cjs-resolves-to-esm"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ag2ai/ag2-js-realtime-client.git"
+    "url": "git+https://github.com/ag2ai/ag2-js-client.git"
   },
+  "main": "dist/index.js",
   "files": [
     "dist"
   ],
   "type": "module",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.17.3",
     "prettier": "^3.4.2",
     "typescript": "^5.7.3"
   }
