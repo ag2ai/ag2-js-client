@@ -15,8 +15,9 @@
   "author": "ag2ai (https://ag2.ai)",
   "scripts": {
     "build": "tsc",
-    "ci": "npm run build",
-    "format": "prettier --write ."
+    "ci": "npm run build && npm run check-format",
+    "format": "prettier --write .",
+    "check-format": "prettier --check ."
   },
   "repository": {
     "type": "git",
