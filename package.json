@@ -15,11 +15,13 @@
   "author": "ag2ai (https://ag2.ai)",
   "scripts": {
     "build": "tsup",
-    "ci": "npm run build && npm run check-format && npm run check-exports && npm run lint",
+    "ci": "npm run build && npm run check-format && npm run check-exports && npm run lint && npm run test",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
     "check-exports": "attw --pack . ",
-    "lint": "tsc"
+    "lint": "tsc",
+    "test": "vitest run",
+    "dev": "vitest"
   },
   "repository": {
     "type": "git",
@@ -41,6 +43,7 @@
     "@arethetypeswrong/cli": "^0.17.3",
     "prettier": "^3.4.2",
     "tsup": "^8.3.6",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.4"
   }
 }
