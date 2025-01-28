@@ -1,5 +1,5 @@
 {
-  "name": "@ag2/realtime-client",
+  "name": "@ag2/client",
   "version": "0.0.1",
   "description": "A JavaScript library for seamless integration and communication with AG2 agents",
   "keywords": [
@@ -14,17 +14,24 @@
   },
   "author": "ag2ai (https://ag2.ai)",
   "scripts": {
-    "build": "tsc",
-    "ci": "npm run build && npm run check-format && npm run check-exports",
+    "build": "tsup",
+    "ci": "npm run build && npm run check-format && npm run check-exports && npm run lint",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
-    "check-exports": "attw --pack . --ignore-rules=cjs-resolves-to-esm"
+    "check-exports": "attw --pack . ",
+    "lint": "tsc"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ag2ai/ag2-js-client.git"
   },
   "main": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "files": [
     "dist"
   ],
@@ -33,6 +40,7 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.17.3",
     "prettier": "^3.4.2",
+    "tsup": "^8.3.6",
     "typescript": "^5.7.3"
   }
 }
