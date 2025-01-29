@@ -1,7 +1,7 @@
-name: CI
+name: Release IIFE
 
 on:
-`- workflow_dispatch:
+`workflow_dispatch:
 
   inputs:
     release:
