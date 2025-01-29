@@ -1,0 +1,46 @@
+name: CI
+
+on:
+`- workflow_dispatch:
+
+  inputs:
+    release:
+      description: 'Release the IIFE bundle'
+      required: true
+      default: 'false'
+    version:
+      description: 'Version to release'
+      required: true
+      default: '0.0.0'
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run CI
+        run: npm run ci
+
+      - uses: ryand56/r2-upload-action@latest
+        with:
+          r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          r2-bucket: ${{ secrets.R2_BUCKET }}
+          source-dir: dist
+          destination-dir: ./
