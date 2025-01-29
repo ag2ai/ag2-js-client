@@ -12,7 +12,7 @@ interface AG2Message {
   [key: string]: any; // Allows any other properties
 }
 
-export async function ag2RTCConnect(webSocketUrl: string): Promise<void> {
+export async function WebRTCConnect(webSocketUrl: string): Promise<void> {
   let ws: WebSocket;
   const pc = new RTCPeerConnection();
   let dc: RTCDataChannel | null = null; // data connection
