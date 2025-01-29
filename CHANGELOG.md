@@ -1,5 +1,12 @@
 # @ag2/client
 
+## 0.1.1
+
+### Patch Changes
+
+- dd18c6a: Fixes to webrtc connect
+- c0b311d: Modified connect webrtc function
+
 ## 0.1.0
 
 ### Minor Changes
