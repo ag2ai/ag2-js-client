@@ -1,18 +1,7 @@
-name: Release IIFE
+name: IIFE
 
 on:
-` workflow_dispatch:
-
-  inputs:
-    release:
-      description: 'Release the IIFE bundle'
-      required: true
-      default: 'false'
-    version:
-      description: 'Version to release'
-      required: true
-      default: '0.0.0'
-
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
