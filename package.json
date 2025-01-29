@@ -22,7 +22,8 @@
     "lint": "tsc",
     "test": "vitest run",
     "dev": "vitest",
-    "prepublishOnly": "npm run ci"
+    "prepublishOnly": "npm run ci",
+    "ci:publish": "npm run ci && changeset publish --access public"
   },
   "repository": {
     "type": "git",
