@@ -59,7 +59,7 @@ jobs:
       - name: Upload Release Asset
         id: upload-release-asset
         run: |
-          gh release upload ${{steps.get_release.outputs.release}} ./dist/index.globaj.js
+          gh release upload ${{steps.get_release.outputs.release}} ./dist/index.global.js
         env:
           GITHUB_TOKEN: ${{ github.TOKEN }}
         shell: bash
