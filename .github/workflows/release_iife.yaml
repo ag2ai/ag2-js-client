@@ -49,11 +49,12 @@ jobs:
       - name: Run CI
         run: npm run ci
 
-      - name: Get Release
+      - name: Get Latest Release
         id: get_release
-        uses: bruceadams/get-release@v1.3.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: pozetroninc/github-action-get-latest-release@master
+        with:
+          repository: ${{ github.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Release Asset
         id: upload-release-asset
