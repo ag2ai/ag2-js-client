@@ -15,15 +15,25 @@ interface AG2Message {
 export class WebRTC {
   private ag2SocketUrl: string;
   private microphone?: MediaStreamTrack;
+  private ws: WebSocket | null;
+  private pc: RTCPeerConnection | undefined;
 
   constructor(ag2SocketUrl: string, microphone?: MediaStreamTrack) {
     this.ag2SocketUrl = ag2SocketUrl;
     this.microphone = microphone;
+    this.ws = null;
+  }
+
+  async disconnect(): Promise<void> {
+    if (this.ws) {
+      this.ws.close();
+    }
+    if (this.pc) {
+      this.pc.close();
+    }
   }
 
   async connect(): Promise<void> {
-    let ws: WebSocket;
-    const pc = new RTCPeerConnection();
     let dc: RTCDataChannel | null = null; // data connection
     const quedMessages: string[] = []; // queue messages from the server before the data connection is open
     let resolve: () => void, reject: (reason?: any) => void;
@@ -32,8 +42,12 @@ export class WebRTC {
       reject = _reject;
     });
 
+    this.pc = new RTCPeerConnection();
+
     async function openRTC(
       init_message: AG2InitMessage,
+      pc: RTCPeerConnection,
+      ws: WebSocket,
       mic: MediaStreamTrack,
       resolve: () => void,
       reject: (reason?: any) => void,
@@ -118,13 +132,13 @@ export class WebRTC {
       microphone.enabled = false;
     }
 
-    ws = new WebSocket(this.ag2SocketUrl);
+    this.ws = new WebSocket(this.ag2SocketUrl);
 
-    ws.onopen = (event) => {
+    this.ws.onopen = (event) => {
       console.log('web socket opened');
     };
 
-    ws.onmessage = async (event) => {
+    this.ws.onmessage = async (event) => {
       try {
         const message: AG2Message = JSON.parse(event.data);
         console.info('Received Message from AG2 backend', message);
@@ -132,6 +146,8 @@ export class WebRTC {
         if (type === 'ag2.init') {
           await openRTC(
             message as AG2InitMessage,
+            this.pc as RTCPeerConnection,
+            this.ws as WebSocket,
             this.microphone as MediaStreamTrack,
             resolve,
             reject,
