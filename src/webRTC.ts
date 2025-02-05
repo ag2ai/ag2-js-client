@@ -18,24 +18,31 @@ export class WebRTC {
   private ag2SocketUrl: string;
   private microphone?: MediaStreamTrack;
   private ws: WebSocket | null;
-  private pc: RTCPeerConnection | undefined;
+  private pc: RTCPeerConnection | null;
   public onAG2SocketClose: (ev: CloseEvent) => void;
+  public onWebRTCClose: (ev: Event) => void;
 
   constructor(ag2SocketUrl: string, microphone?: MediaStreamTrack) {
     this.ag2SocketUrl = ag2SocketUrl;
     this.microphone = microphone;
     this.ws = null;
+    this.pc = null;
     this.onAG2SocketClose = (ev: CloseEvent) => {
       console.log('AG2 Websocket closed');
     };
+    this.onWebRTCClose = (ev: Event) => {
+      console.log('WebRTC closed');
+    };
   }
 
-  async disconnect(): Promise<void> {
+  async close(): Promise<void> {
     if (this.ws) {
       this.ws.close();
+      this.ws = null;
     }
     if (this.pc) {
       this.pc.close();
+      this.pc = null;
     }
   }
 
@@ -52,6 +59,7 @@ export class WebRTC {
 
     async function openRTC(
       init_message: AG2InitMessage,
+      webRTC: WebRTC,
       pc: RTCPeerConnection,
       ws: WebSocket,
       mic: MediaStreamTrack,
@@ -76,16 +84,30 @@ export class WebRTC {
 
       // Set up data channel for sending and receiving events
       const _dc = pc.createDataChannel('oai-events');
+      _dc.addEventListener('close', (e) => {
+        webRTC.onWebRTCClose(e);
+      });
+
       _dc.addEventListener('message', (e) => {
         // Realtime server events appear here!
+        let message: AG2Message;
         try {
-          const message: AG2Message = JSON.parse(e.data);
-          if (message.type && message.type.includes('function')) {
-            console.log('WebRTC function message', message);
-            ws.send(e.data);
-          }
+          message = JSON.parse(e.data);
         } catch (error) {
           console.error('Error parsing message', e.data, error);
+          return;
+        }
+        if (message.type && message.type.includes('function')) {
+          console.log('WebRTC function message', message);
+          try {
+            ws.send(e.data);
+          } catch (error) {
+            console.error(
+              'Error sending function message to AG2 backend',
+              error,
+            );
+            webRTC.close();
+          }
         }
       });
 
@@ -156,6 +178,7 @@ export class WebRTC {
         if (type === 'ag2.init') {
           await openRTC(
             message as AG2InitMessage,
+            this,
             this.pc as RTCPeerConnection,
             this.ws as WebSocket,
             this.microphone as MediaStreamTrack,
