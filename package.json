@@ -1,6 +1,6 @@
 {
   "name": "@ag2/client",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "A JavaScript library for seamless integration and communication with AG2 agents",
   "keywords": [
     "ag2",
