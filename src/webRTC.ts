@@ -1,3 +1,5 @@
+import type { WebSocketEvents } from 'vitest';
+
 interface AG2InitMessage {
   type: 'ag2.init';
   config: {
@@ -17,11 +19,15 @@ export class WebRTC {
   private microphone?: MediaStreamTrack;
   private ws: WebSocket | null;
   private pc: RTCPeerConnection | undefined;
+  public onAG2SocketClose: (ev: CloseEvent) => void;
 
   constructor(ag2SocketUrl: string, microphone?: MediaStreamTrack) {
     this.ag2SocketUrl = ag2SocketUrl;
     this.microphone = microphone;
     this.ws = null;
+    this.onAG2SocketClose = (ev: CloseEvent) => {
+      console.log('AG2 Websocket closed');
+    };
   }
 
   async disconnect(): Promise<void> {
@@ -136,6 +142,10 @@ export class WebRTC {
 
     this.ws.onopen = (event) => {
       console.log('web socket opened');
+    };
+
+    this.ws.onclose = (event) => {
+      this.onAG2SocketClose(event);
     };
 
     this.ws.onmessage = async (event) => {
