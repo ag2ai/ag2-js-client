@@ -1,4 +1,4 @@
-import type { WebSocketEvents } from 'vitest';
+import type { W } from 'vitest/dist/chunks/worker.CIpff8Eg.js';
 
 interface AG2InitMessage {
   type: 'ag2.init';
@@ -19,30 +19,32 @@ export class WebRTC {
   private microphone?: MediaStreamTrack;
   private ws: WebSocket | null;
   private pc: RTCPeerConnection | null;
-  public onAG2SocketClose: (ev: CloseEvent) => void;
-  public onWebRTCClose: (ev: Event) => void;
+  public onDisconnect: () => void;
 
   constructor(ag2SocketUrl: string, microphone?: MediaStreamTrack) {
     this.ag2SocketUrl = ag2SocketUrl;
     this.microphone = microphone;
     this.ws = null;
     this.pc = null;
-    this.onAG2SocketClose = (ev: CloseEvent) => {
-      console.log('AG2 Websocket closed');
-    };
-    this.onWebRTCClose = (ev: Event) => {
-      console.log('WebRTC closed');
+    this.onDisconnect = () => {
+      console.log('WebRTC disconnected');
     };
   }
 
   async close(): Promise<void> {
+    if (this.microphone) {
+      this.microphone?.stop();
+      this.microphone = undefined;
+    }
     if (this.ws) {
-      this.ws.close();
+      const ws = this.ws;
       this.ws = null;
+      ws.close();
     }
     if (this.pc) {
-      this.pc.close();
+      const pc = this.pc;
       this.pc = null;
+      pc.close();
     }
   }
 
@@ -82,11 +84,14 @@ export class WebRTC {
       mic.enabled = false;
       pc.addTrack(mic);
 
+      pc.onconnectionstatechange = (e) => {
+        if (pc.connectionState === 'disconnected') {
+          webRTC.close();
+          webRTC.onDisconnect();
+        }
+      };
       // Set up data channel for sending and receiving events
       const _dc = pc.createDataChannel('oai-events');
-      _dc.addEventListener('close', (e) => {
-        webRTC.onWebRTCClose(e);
-      });
 
       _dc.addEventListener('message', (e) => {
         // Realtime server events appear here!
@@ -167,7 +172,8 @@ export class WebRTC {
     };
 
     this.ws.onclose = (event) => {
-      this.onAG2SocketClose(event);
+      this.close();
+      this.onDisconnect();
     };
 
     this.ws.onmessage = async (event) => {
