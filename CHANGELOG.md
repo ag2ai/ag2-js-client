@@ -1,5 +1,11 @@
 # @ag2/client
 
+## 0.3.1
+
+### Patch Changes
+
+- onDisconnect hook for websockets based realtime
+
 ## 0.3.0
 
 ### Minor Changes
