@@ -1,5 +1,11 @@
 # @ag2/client
 
+## 0.3.0
+
+### Minor Changes
+
+- Provide onDisconnect hook
+
 ## 0.2.0
 
 ### Minor Changes
