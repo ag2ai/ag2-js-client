@@ -19,6 +19,7 @@ interface StartSessionMessage {
 type WebSocketMessage = MediaMessage | StartSessionMessage;
 
 export class WebsocketAudio {
+  onDisconnect: () => void;
   private webSocketUrl: string;
   private socket: WebSocket | null;
   // audio out
@@ -33,6 +34,9 @@ export class WebsocketAudio {
   private bufferSize: number; // Define the buffer size for capturing chunks
 
   constructor(webSocketUrl: string) {
+    this.onDisconnect = () => {
+      console.log('WebSocket disconnected.');
+    };
     this.webSocketUrl = webSocketUrl;
     this.socket = null;
     this.outAudioContext = null;
@@ -64,7 +68,7 @@ export class WebsocketAudio {
       };
 
       this.socket.onclose = () => {
-        console.log('WebSocket disconnected.');
+        this.onDisconnect();
       };
 
       this.socket.onmessage = async (event: MessageEvent) => {
