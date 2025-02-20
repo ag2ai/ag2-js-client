@@ -1,5 +1,11 @@
 # @ag2/client
 
+## 0.4.0
+
+### Minor Changes
+
+- Input audio forwarding in WebRTC
+
 ## 0.3.1
 
 ### Patch Changes
