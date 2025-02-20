@@ -1,5 +1,3 @@
-import type { W } from 'vitest/dist/chunks/worker.CIpff8Eg.js';
-
 interface AG2InitMessage {
   type: 'ag2.init';
   config: {
