@@ -8,64 +8,59 @@ class ResamplerProcessor extends AudioWorkletProcessor {
     this.ratio = this.inputSampleRate / this.outputSampleRate;
     this.resampledBuffer = []; // Store resampled data to send to the main thread
     this.processCount = 0;  //Counter.
-    this.port.postMessage({ type: 'log', data: "constructor" }); 
+    this.pcmData = new Int16Array(8196);
+    this.pcmIndex = 0;
   }
 
   process(inputs, outputs, parameters) {
     const input = inputs[0];
     const output = outputs[0];
 
-    this.port.postMessage({ type: 'log', data: "process" }); 
-
     if (input.length === 0 || input[0].length === 0) {
       return true; // No input, nothing to do
     }
 
     const inputChannel = input[0];
-    const outputChannel = output[0];
-
-    // Pass the original input data to the output
-    for (let i = 0; i < inputChannel.length; i++) {
-      outputChannel[i] = inputChannel[i]; // Pass through original data
-    }
 
     // Resample the data
-    const resampledData = this.resample(inputChannel);
-    this.resampledBuffer = this.resampledBuffer.concat(Array.from(resampledData));
+    this.resample(inputChannel);
 
     this.processCount++; //Increment process count
     let messageRate = 100; //Message sent every 100 process calls.
     // Send the resampled data to the main thread (send in chunks)
-    if (this.processCount % messageRate === 0 && this.resampledBuffer.length > 0) {
-      //Limit what we send.
-      let sendCount = 256;
-      let send = this.resampledBuffer.slice(0, sendCount);
-
-      this.port.postMessage({ type: 'resampledData', data: send });  //Send only part of the resampledBuffer;
-
-      //Purge the buffer.
-      this.resampledBuffer = this.resampledBuffer.slice(sendCount);
+    if (this.processCount % messageRate === 0 && this.pcmIndex > 0) {
+      // Convert Int16Array to a binary buffer (ArrayBuffer)
+      const pcmBuffer = new ArrayBuffer(this.pcmIndex * 2); // 2 bytes per sample
+      const pcmView = new DataView(pcmBuffer);
+      for (let i = 0; i < this.pcmIndex; i++) {
+        const pcmData_i = this.pcmData[i];
+        if (pcmData_i) {
+          pcmView.setInt16(i * 2, pcmData_i, true); // true means little-endian
+        }
+      }
+      this.port.postMessage({ type: 'resampledData', data: pcmBuffer }); 
+      this.pcmData = new Int16Array(8196);
+      this.pcmIndex = 0;
     }
 
     return true;
   }
 
   resample(inputChannel) {
-    const resampledData = [];
     let inputIndex = 0;
-
-    for (let outputIndex = 0; outputIndex < inputChannel.length / this.ratio; outputIndex++) {
+    const howMany = Math.floor(inputChannel.length / this.ratio)
+    let outputIndex;
+    for (outputIndex = 0; outputIndex < howMany; outputIndex++) {
       const inputIndexFloat = outputIndex * this.ratio;
       inputIndex = Math.floor(inputIndexFloat);
 
       if (inputIndex < inputChannel.length) {
-        resampledData.push(inputChannel[inputIndex]); // Replace with interpolation
+        this.pcmData[this.pcmIndex+outputIndex] = Math.max(-32768, Math.min(32767, inputChannel[inputIndex] * 32767));
       } else {
         break; //No more data, break out of loop
       }
     }
-
-    return resampledData;
+    this.pcmIndex += outputIndex;
   }
 }
 
