@@ -19,6 +19,7 @@ export class WebRTC {
   private microphone?: MediaStreamTrack;
   private ws: WebSocket | null;
   private pc: RTCPeerConnection | null;
+  private connected: boolean;
   public onDisconnect: () => void;
 
   constructor(ag2SocketUrl: string, microphone?: MediaStreamTrack) {
@@ -26,7 +27,9 @@ export class WebRTC {
     this.microphone = microphone;
     this.ws = null;
     this.pc = null;
+    this.connected = false;
     this.onDisconnect = () => {
+      this.connected = false;
       console.log('WebRTC disconnected');
     };
   }
@@ -159,13 +162,8 @@ export class WebRTC {
       });
 
       const audioContext = new window.AudioContext();
-
-      // 2. Create a MediaStreamSource
       const source = audioContext.createMediaStreamSource(ms);
-
-      // 3. Get the sampling rate from the AudioContext
       const sampleRate = audioContext.sampleRate;
-
       console.log('Sampling Rate:', sampleRate);
       console.log('ResamplerSrc', ResamplerProcessorSrc);
       await audioContext.audioWorklet.addModule(ResamplerProcessorSrc);
@@ -178,18 +176,23 @@ export class WebRTC {
           },
         },
       );
-      source.connect(resamplerNode).connect(audioContext.destination);
+      source.connect(resamplerNode);
       resamplerNode.port.onmessage = (event) => {
-        console.log('Received message from resampler node', event);
+        //console.log('Received message from resampler node', event);
         if (event.data.type === 'resampledData') {
           const resampledData = event.data.data; //Get resampledData
-          // Now you have access to the resampled data in your main thread.
-          // You can do whatever you need with it (e.g., visualize it, record it, etc.).
-          console.log('Received resampled data:', resampledData);
+          console.log('Received resampled data len:', resampledData.length);
+          const audioMessage = {
+            type: 'input_audio_buffer.delta',
+            delta: btoa(resampledData),
+          };
+          if (this.connected && this.ws) {
+            this.ws.send(JSON.stringify(audioMessage));
+          }
         }
       };
 
-      const microphone = ms.getTracks()[0];
+      const microphone = ms.getTracks()[0]?.clone();
       if (!microphone) {
         throw new Error('No microphone found');
       }
@@ -238,5 +241,6 @@ export class WebRTC {
     };
     await completed;
     console.log('WebRTC fully operational');
+    this.connected = true;
   }
 }
