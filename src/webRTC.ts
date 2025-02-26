@@ -160,11 +160,11 @@ export class WebRTC {
 
       // 2. Create a MediaStreamSource
       const source = audioContext.createMediaStreamSource(ms);
-  
+
       // 3. Get the sampling rate from the AudioContext
       const sampleRate = audioContext.sampleRate;
-  
-      console.log("Sampling Rate:", sampleRate);      
+
+      console.log('Sampling Rate:', sampleRate);
       const microphone = ms.getTracks()[0];
       if (!microphone) {
         throw new Error('No microphone found');
