@@ -1,5 +1,11 @@
 # @ag2/client
 
+## 0.4.1
+
+### Patch Changes
+
+- Audio webhook for WebRTC
+
 ## 0.4.0
 
 ### Minor Changes
