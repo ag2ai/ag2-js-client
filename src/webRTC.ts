@@ -167,6 +167,7 @@ export class WebRTC {
       const sampleRate = audioContext.sampleRate;
 
       console.log('Sampling Rate:', sampleRate);
+      console.log('ResamplerSrc', ResamplerProcessorSrc);
       await audioContext.audioWorklet.addModule(ResamplerProcessorSrc);
       const resamplerNode = new AudioWorkletNode(
         audioContext,
