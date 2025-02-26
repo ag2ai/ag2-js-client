@@ -180,11 +180,16 @@ export class WebRTC {
       resamplerNode.port.onmessage = (event) => {
         //console.log('Received message from resampler node', event);
         if (event.data.type === 'resampledData') {
-          const resampledData = event.data.data; //Get resampledData
-          console.log('Received resampled data len:', resampledData.length);
+          const audioData = event.data.data; //Get resampledData
+          console.log('Received resampled data len:', audioData.length);
+
+          const byteArray = new Uint8Array(audioData); // Create a Uint8Array view
+          const bufferString = String.fromCharCode(...byteArray); // convert each byte of the buffer to a character
+          const audioBase64String = btoa(bufferString); // Apply base64
+
           const audioMessage = {
             type: 'input_audio_buffer.delta',
-            delta: btoa(resampledData),
+            delta: btoa(audioBase64String),
           };
           if (this.connected && this.ws) {
             this.ws.send(JSON.stringify(audioMessage));
