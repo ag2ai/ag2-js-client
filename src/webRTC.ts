@@ -1,3 +1,5 @@
+import { ResamplerProcessorSrc } from './soundWorklet';
+
 interface AG2InitMessage {
   type: 'ag2.init';
   config: {
@@ -165,6 +167,26 @@ export class WebRTC {
       const sampleRate = audioContext.sampleRate;
 
       console.log('Sampling Rate:', sampleRate);
+      await audioContext.audioWorklet.addModule(ResamplerProcessorSrc);
+      const resamplerNode = new AudioWorkletNode(
+        audioContext,
+        'resampler-processor',
+        {
+          processorOptions: {
+            outputSampleRate: 24000,
+          },
+        },
+      );
+      source.connect(resamplerNode).connect(audioContext.destination);
+      resamplerNode.port.onmessage = (event) => {
+        if (event.data.type === 'resampledData') {
+          const resampledData = event.data.data; //Get resampledData
+          // Now you have access to the resampled data in your main thread.
+          // You can do whatever you need with it (e.g., visualize it, record it, etc.).
+          console.log('Received resampled data:', resampledData);
+        }
+      };
+
       const microphone = ms.getTracks()[0];
       if (!microphone) {
         throw new Error('No microphone found');
