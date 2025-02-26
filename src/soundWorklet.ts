@@ -8,11 +8,14 @@ class ResamplerProcessor extends AudioWorkletProcessor {
     this.ratio = this.inputSampleRate / this.outputSampleRate;
     this.resampledBuffer = []; // Store resampled data to send to the main thread
     this.processCount = 0;  //Counter.
+    this.port.postMessage({ type: 'log', data: "constructor" }); 
   }
 
   process(inputs, outputs, parameters) {
     const input = inputs[0];
     const output = outputs[0];
+
+    this.port.postMessage({ type: 'log', data: "process" }); 
 
     if (input.length === 0 || input[0].length === 0) {
       return true; // No input, nothing to do

@@ -179,6 +179,7 @@ export class WebRTC {
       );
       source.connect(resamplerNode).connect(audioContext.destination);
       resamplerNode.port.onmessage = (event) => {
+        console.log('Received message from resampler node', event);
         if (event.data.type === 'resampledData') {
           const resampledData = event.data.data; //Get resampledData
           // Now you have access to the resampled data in your main thread.
